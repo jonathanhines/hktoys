@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moving Squares</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="show-canvas" width="1600" height="800"></canvas>
+  </body>
+  <script>
+    var intervalHandle;
+    areaHeight = window.innerHeight;
+    areaWidth = window.innerWidth;
+    areaCenterX = areaWidth / 2;
+    areaCenterY = areaHeight / 2;
+
+    itemWidth = 10;
+    itemHeight = itemWidth;
+    itemCount = 20;
+    armsCount = 5;
+
+    frameDelay = 50;
+    colorStep = 30;
+    frameIndex = 0;
+
+    items = [];
+    function addItem(color, radius, angularVelocity, startingAngle) {
+      items.push({
+        x: 0,
+        y: 0,
+        c: color,
+        swirlOut: radius,
+        swirlSpin: angularVelocity,
+        thetaOffset: startingAngle,
+      });
+    }
+
+    for (j = 0; j < armsCount; ++j) {
+      for (let i = 0; i < itemCount; ++i) {
+        addItem(i / itemCount, i * 20, i, (j * 360) / armsCount);
+        addItem(i / itemCount, i * 20, -i, (j * 360) / armsCount);
+      }
+    }
+
+    // cached values
+    halfItemWidth = itemWidth / 2;
+    halfItemHeight = itemHeight / 2;
+    degToRad = 3.14159 / 180;
+    (() => {
+      canv = document.getElementById("show-canvas");
+      canv.height = areaHeight;
+      canv.width = areaWidth;
+      ctx = canv.getContext("2d");
+      document.addEventListener("keydown", keyDown);
+      nextFrame();
+    })();
+
+    function start() {
+      intervalHandle = setInterval(nextFrame, frameDelay);
+    }
+
+    function pause() {
+      if (intervalHandle) {
+        clearInterval(intervalHandle);
+        intervalHandle = undefined;
+      }
+    }
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canv.width, canv.height);
+    function nextFrame() {
+      // clear canvas
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canv.width, canv.height);
+
+      // Make it breath
+      breath = 0.8 + 0.3 * Math.sin(frameIndex * 5 * degToRad);
+      items.forEach((item) => {
+        theta = (item.thetaOffset + frameIndex * item.swirlSpin) * degToRad;
+        r = item.swirlOut * breath;
+        item.x = areaCenterX + r * Math.sin(theta);
+        item.y = areaCenterY + r * Math.cos(theta);
+        drawRectangle(item.x, item.y, item.c);
+      });
+
+      frameIndex++;
+    }
+
+    function drawRectangle(x, y, h) {
+      ctx.fillStyle = hslStyle(h, 1, 0.5);
+      ctx.fillRect(x - halfItemWidth, y - halfItemWidth, itemWidth, itemHeight);
+    }
+
+    function keyDown(ev) {
+      if (ev.key === " ") {
+        if (intervalHandle) {
+          pause();
+        } else {
+          start();
+        }
+      } else {
+        if (!intervalHandle) {
+          start();
+        }
+      }
+    }
+    // // input: h as an angle in [0,360] and s,l in [0,1] - output: r,g,b in [0,1]
+    // function hsl2rgb(h, s, l) {
+    //   let a = s * Math.min(l, 1 - l);
+    //   let f = (n, k = (n + h / 30) % 12) => l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    //   return [f(0), f(8), f(4)];
+    //   // return `rgb(${f(0)},${f(8)},${f(4)})`;
+    // }
+
+    /**
+     * Converts an HSL color value to RGB. Conversion formula
+     * adapted from https://en.wikipedia.org/wiki/HSL_color_space.
+     * Assumes h, s, and l are contained in the set [0, 1] and
+     * returns r, g, and b in the set [0, 255].
+     *
+     * @param   {number}  h       The hue
+     * @param   {number}  s       The saturation
+     * @param   {number}  l       The lightness
+     * @return  {Array}           The RGB representation
+     */
+    function hslToRgb(h, s, l) {
+      let r, g, b;
+
+      if (s === 0) {
+        r = g = b = l; // achromatic
+      } else {
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hueToRgb(p, q, h + 1 / 3);
+        g = hueToRgb(p, q, h);
+        b = hueToRgb(p, q, h - 1 / 3);
+      }
+
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+
+    function hueToRgb(p, q, t) {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    }
+
+    /**
+     * Write a hsl value in a way that can be used as a canvas fill style
+     * Assumes h, s, and l are contained in the set [0, 1] and
+     * returns style text.
+     *
+     * @param   {number}  h       The hue
+     * @param   {number}  s       The saturation
+     * @param   {number}  l       The lightness
+     * @return  {string}          The style representation
+     */
+    function hslStyle(h, s, l) {
+      const colors = hslToRgb(h, s, l);
+      return `rgb(${colors[0]},${colors[1]},${colors[2]})`;
+    }
+  </script>
+</html>
