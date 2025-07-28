@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake game</title>
+    <style>
+      #game-status {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        color: red;
+        font-size: 3rem;
+        text-align: center;
+        width: 100%;
+        transform: translateY(-50%);
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 30px 0;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="game-container"
+      style="width: 400px; height: 400px; position: relative"
+    >
+      <canvas id="game-canvas" width="400" height="400"></canvas>
+      <div id="game-status" class="hidden"></div>
+    </div>
+    <div id="game-score"></div>
+  </body>
+  <script>
+    var intervalHandle;
+    squareWidth = 20;
+    squareBorderWidth = 0;
+    areaSquares = 20;
+    xVel = 0;
+    yVel = 0;
+    playerX = 10;
+    playerY = 10;
+    snakeLength = 5;
+    snake = [];
+    var appleX;
+    var appleY;
+    var snakeColor = "green";
+    var appleColor = "red";
+    var framesPerSecond = 10;
+    var gameStatusElement;
+    var gameScoreElement;
+    var applesEaten = 0;
+    (() => {
+      gameStatusElement = document.getElementById("game-status");
+      gameScoreElement = document.getElementById("game-score");
+      canv = document.getElementById("game-canvas");
+      ctx = canv.getContext("2d");
+      document.addEventListener("keydown", keyPush);
+      nextFrame();
+      nextFrame();
+    })();
+    function startGame() {
+      intervalHandle = setInterval(nextFrame, 1000 / framesPerSecond);
+      applesEaten = 0;
+      printGameStatus("");
+      printScore();
+    }
+    function pauseGame() {
+      if (intervalHandle) {
+        clearInterval(intervalHandle);
+        intervalHandle = undefined;
+      }
+    }
+    function gameOver() {
+      pauseGame();
+      printGameStatus("Game Over");
+    }
+    function printScore() {
+      gameScoreElement.innerText = "Score: " + applesEaten;
+    }
+    function printGameStatus(status) {
+      gameStatusElement.innerText = status;
+      if (status.length > 0) {
+        gameStatusElement.classList.remove("hidden");
+      } else {
+        gameStatusElement.classList.add("hidden");
+      }
+    }
+
+    function newApple() {
+      appleX = Math.floor(Math.random() * areaSquares);
+      appleY = Math.floor(Math.random() * areaSquares);
+      if (snake.some((s) => s.x === appleX && s.y === appleY)) {
+        newApple();
+      }
+    }
+    newApple();
+
+    function nextFrame() {
+      playerX += xVel;
+      playerY += yVel;
+
+      if (playerX >= areaSquares) {
+        playerX = 0;
+      }
+      if (playerX < 0) {
+        playerX = areaSquares - 1;
+      }
+      if (playerY >= areaSquares) {
+        playerY = 0;
+      }
+      if (playerY < 0) {
+        playerY = areaSquares - 1;
+      }
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canv.width, canv.height);
+
+      ctx.fillStyle = snakeColor;
+      for (var i = 0; i < snake.length; ++i) {
+        ctx.fillRect(
+          snake[i].x * squareWidth + squareBorderWidth,
+          snake[i].y * squareWidth + squareBorderWidth,
+          squareWidth - squareBorderWidth * 2,
+          squareWidth - squareBorderWidth * 2
+        );
+        if (snake[i].x === playerX && snake[i].y === playerY) {
+          // We just lost, reset the snake
+          snakeLength = 5;
+          if (intervalHandle) {
+            gameOver();
+          }
+        }
+      }
+      snake.push({ x: playerX, y: playerY });
+      while (snake.length > snakeLength) {
+        snake.shift();
+      }
+
+      if (appleX === playerX && appleY === playerY) {
+        // We ate an apple!
+        snakeLength++;
+        applesEaten++;
+        printScore();
+        newApple();
+      }
+      ctx.fillStyle = appleColor;
+      ctx.fillRect(
+        appleX * areaSquares,
+        appleY * areaSquares,
+        squareWidth,
+        squareWidth
+      );
+    }
+    function keyPush(ev) {
+      if (ev.key === " ") {
+        if (intervalHandle) {
+          pauseGame();
+        } else {
+          startGame();
+        }
+      } else {
+        if (!intervalHandle) {
+          startGame();
+        }
+      }
+      switch (ev.key) {
+        case "ArrowUp":
+          if (yVel === 1) {
+            break;
+          }
+          xVel = 0;
+          yVel = -1;
+          break;
+
+        case "ArrowDown":
+          if (yVel === -1) {
+            break;
+          }
+          xVel = 0;
+          yVel = 1;
+          break;
+
+        case "ArrowRight":
+          if (xVel === -1) {
+            break;
+          }
+          xVel = 1;
+          yVel = 0;
+          break;
+
+        case "ArrowLeft":
+          if (xVel === 1) {
+            break;
+          }
+          xVel = -1;
+          yVel = 0;
+          break;
+      }
+    }
+  </script>
+</html>
