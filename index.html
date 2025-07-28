@@ -6,13 +6,21 @@
     <title>HK Toys</title>
     <style>
       body {
+        /* Shared values */
+        --background: #fdfdfd;
+        --heading-color: #222;
+        --text-color: #333;
+        --link-color: #0366d6;
+        --highlight-color: #ccc;
+
+        /* Styles */
         font-family: system-ui, sans-serif;
         max-width: 800px;
         margin: 2rem auto;
         padding: 1rem;
         line-height: 1.6;
-        background-color: #fdfdfd;
-        color: #333;
+        background-color: var(--background);
+        color: var(--text-color);
       }
 
       h1,
@@ -20,18 +28,18 @@
         font-weight: 600;
         margin-top: 2rem;
         margin-bottom: 1rem;
-        color: #222;
+        color: var(--heading-color);
       }
 
       h1 {
         font-size: 2rem;
-        border-bottom: 2px solid #ccc;
+        border-bottom: 2px solid var(--highlight-color);
         padding-bottom: 0.3rem;
       }
 
       h2 {
         font-size: 1.5rem;
-        border-left: 4px solid #ccc;
+        border-left: 4px solid var(--highlight-color);
         padding-left: 0.5rem;
       }
 
@@ -49,7 +57,7 @@
       }
 
       a {
-        color: #0366d6;
+        color: var(--link-color);
         text-decoration: none;
       }
 
