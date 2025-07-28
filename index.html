@@ -5,22 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HK Toys</title>
     <style>
-      body {
+      :root {
         /* Shared values */
-        --background: #fdfdfd;
+        --background-color: #fdfdfd;
         --heading-color: #222;
         --text-color: #333;
         --link-color: #0366d6;
         --highlight-color: #ccc;
+        --footer-color: #eee;
+        --content-max-width: 800px;
+      }
 
-        /* Styles */
+      body {
         font-family: system-ui, sans-serif;
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 1rem;
+        margin: 0 auto;
+        padding: 0;
         line-height: 1.6;
-        background-color: var(--background);
+        background-color: var(--background-color);
         color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      section {
+        padding: 0 1rem;
+        flex: 1;
+        width: 100%;
+        max-width: var(--content-max-width);
       }
 
       h1,
@@ -64,22 +77,120 @@
       a:hover {
         text-decoration: underline;
       }
+
+      footer {
+        flex: 0;
+        background-color: var(--footer-color);
+        width: 100vw;
+        font-size: 0.9em;
+        display: flex;
+        justify-content: center;
+      }
+      .footer-content {
+        width: var(--content-max-width);
+        max-width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1em;
+      }
+      footer ul {
+        list-style: none;
+        display: inline-flex;
+        margin: 0;
+        padding: 0;
+      }
+      footer li {
+        padding: 0;
+        margin: 0;
+      }
+      footer li::after {
+        content: "|";
+        padding: 0 0.5em;
+      }
+      footer li:last-child::after {
+        content: "";
+      }
     </style>
   </head>
   <body>
-    <h1>HK Toy Projects</h1>
-    <p>These are projects that we've made for fun. See what we've made!</p>
-    <h2>Color Stuff</h2>
-    <p>Hit space bar on each of these to kick off something interesting</p>
-    <ul>
-      <li><a href="colors/explosion.html">Explosion</a></li>
-      <li><a href="colors/movement.html">Movement</a></li>
-      <li><a href="colors/fireworks.html">Fireworks</a></li>
-    </ul>
-    <h2>Games</h2>
-    <ul>
-      <li><a href="games/snake.html">Snake</a></li>
-      <li><a href="games/pong.html">Pong</a></li>
-    </ul>
+    <section>
+      <h1>HK Toy Projects</h1>
+      <p>These are projects that we've made for fun. See what we've made!</p>
+      <h2>Color Stuff</h2>
+      <p>Hit space bar on each of these to kick off something interesting</p>
+      <ul>
+        <li><a href="colors/explosion.html">Explosion</a></li>
+        <li><a href="colors/movement.html">Movement</a></li>
+        <li><a href="colors/fireworks.html">Fireworks</a></li>
+      </ul>
+      <h2>Games</h2>
+      <ul>
+        <li><a href="games/snake.html">Snake</a></li>
+        <li><a href="games/pong.html">Pong</a></li>
+      </ul>
+    </section>
+
+    <footer>
+      <div class="footer-content">
+        Theme:
+        <ul>
+          <li><a onclick="setTheme('default')">Default</a></li>
+          <li><a onclick="setTheme('hotPink')">Hot Pink</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script>
+      function setTheme(themeName) {
+        const root = document.documentElement;
+        const theme = themes[themeName] || themes["default"];
+        root.style.setProperty("--background-color", theme.background);
+        root.style.setProperty("--heading-color", theme.heading);
+        root.style.setProperty("--text-color", theme.text);
+        root.style.setProperty("--link-color", theme.link);
+        root.style.setProperty("--highlight-color", theme.highlight);
+        root.style.setProperty("--footer-color", theme.footer);
+      }
+
+      const themes = {
+        default: {
+          background: "#fdfdfd",
+          heading: "#222",
+          text: "#333",
+          link: "#0366d6",
+          highlight: "#ccc",
+          footer: "#eee",
+        },
+      };
+
+      function addTheme(
+        name,
+        background,
+        heading,
+        text,
+        link,
+        highlight,
+        footer
+      ) {
+        themes[name] = {
+          background,
+          heading,
+          text,
+          link,
+          highlight,
+          footer,
+        };
+      }
+
+      addTheme(
+        "hotPink",
+        "#ff008f",
+        "#810df5",
+        "#19ffff",
+        "#a8d603",
+        "#41f500",
+        "#a700d6"
+      );
+    </script>
   </body>
 </html>
